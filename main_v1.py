@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy2 Experiment Builder (v1.85.3),
@@ -20,10 +20,10 @@ def generate_block(block_length, congruent_quantity):
     '''Preset which rules and which pictures are shown during a block'''
     block = []
     congruent = random.sample(range(block_length),congruent_quantity) #Zieht die Stellen des Blockes an welchem die congruent rule verwendet wird
-    pool = range(block_length)
+    pool = list(range(block_length))
     picture = [[],[],[],[]]
     for i in range(4):                                                #Fuer jedes Bild
-        for j in range((block_length/4)+1):                           #Wird (Blocklaenge/4) mal
+        for j in range((block_length//4)+1):                           #Wird (Blocklaenge/4) mal
             if (4*(j+1)) <= block_length or i<block_length % 4:       #Wenn noch "Positionen uebrig" sind
                 picture[i].append(random.choice(pool))                #Zufaellig eine Position gezogen
                 pool.remove(picture[i][j])
@@ -51,10 +51,10 @@ def introduction(gui, configs):
     block_procedure = generate_block(int(configs['Block']['tryout_length']), int(configs['Block']['congruent_number']))
     for j in range(int(configs['Block']['tryout_length'])):
         gui.show_pictures(block_procedure[j])
-        guessed_number=gui.which_button('inf')
+        guessed_number=gui.which_button(float('inf'))
         choosen = guessed_number[0]
         evaluation = gui.show_right(choosen)
-        
+
 
 def tryout(gui, configs):
     '''second practise identical with real experiment, but without timeout adjustment, no info in logfile'''
@@ -71,7 +71,6 @@ def tryout(gui, configs):
             pool.remove(choosen)
             gui.show_timeout()
         evaluation = gui.show_intertrial(choosen)
-
 
 def real_game(gui, configs):
     global max
@@ -155,7 +154,7 @@ def main():
                 int(configs['General']['picture_size']),
                 float(configs['General']['evaluation_time']),
                 int(configs['General']['color_scheme']))
-    gui.show_rules()
+    #gui.show_rules()
     while gui.show_introduction():
         introduction(gui, configs)
     while gui.show_tryout():
@@ -164,7 +163,5 @@ def main():
 
     gui.show_end_of_game(max)
 
-
 if __name__=="__main__":
     main()
-    

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from psychopy import visual
@@ -10,7 +10,7 @@ import time
 import os
 
 class Bildgenerator:
-    
+
     def __init__(self, color_scheme):
         if color_scheme == 1:                           #Setzt die decode_tabelle der Farbcodes:
             self.color_decode = [0,1,2,3]               #Die 1. Zahl im Array gibt die Position des blauen Bildes an
@@ -21,12 +21,12 @@ class Bildgenerator:
         elif color_scheme == 4:
             self.color_decode = [1,3,0,2]
         self.last_shown_images = [[], []]               #Speichert die letzen beiden gezeigten Bilder in zwei Listen
-                                                        #Dabei enthält eine Liste zwei Einträge: Einen Integer fuer Form und einen fuer Farbe
+                                                        #Dabei enthaelt eine Liste zwei Eintraege: Einen Integer fuer Form und einen fuer Farbe
         self.position = 0
         self.image_pool = [[],[],[],[]]
         self.initialize_image_pool()
         self.set_option()
-    
+
     def initialize_image_pool(self):
         image_pool =[[],[],[],[]]
         for i in range(0,4):
@@ -39,9 +39,9 @@ class Bildgenerator:
                     self.image_pool[2].append("Stuhl"+str(j))
                 elif i == 3:
                     self.image_pool[3].append("Vogel"+str(j))
-        
+
     def set_option(self):
-        '''Creates the answer option pictures and writes them to Bilder/tmp''' 
+        '''Creates the answer option pictures and writes them to Bilder/tmp'''
         for i in range(0,4):
             img = cv.imread("Bilder/"+self.image_pool[i][0]+".jpg",cv.IMREAD_COLOR)
             img = self.colorize_img(img, i)
@@ -49,22 +49,24 @@ class Bildgenerator:
             img = img.astype(np.float32)
             img = cv.resize(img, (190,190), interpolation = cv.INTER_AREA)
             img = cv.copyMakeBorder(img, reduction, reduction, reduction, reduction, cv.BORDER_CONSTANT, value=(255,255,255))
+            if not os.path.exists("Bilder/tmp"):
+                os.makedirs("Bilder/tmp")
             cv.imwrite("Bilder/tmp/option"+str(i)+".jpg", img)
-        
+
     def set_image1(self,form, color):
         image1 = []
         image1.append(form)
         image1.append(color)
         self.last_shown_images[0] = image1
-        
+
     def set_image2(self,form, color):
         image2 = []
         image2.append(form)
         image2.append(color)
-        self.last_shown_images[1] = image2        
-        
+        self.last_shown_images[1] = image2
+
     def swap_images(self):
-        self.last_shown_images[0], self.last_shown_images[1] = self.last_shown_images[1], self.last_shown_images[0]    
+        self.last_shown_images[0], self.last_shown_images[1] = self.last_shown_images[1], self.last_shown_images[0]
 
     def concatenate_second_img(self, img1, form_pool, color_pool):
         form=choice(form_pool)                          #Waehlt zufaellig eine Form aus
@@ -74,7 +76,7 @@ class Bildgenerator:
         color = choice(color_pool)
         img2 = self.colorize_img(img2, color) #Faerbt das Bild random mit einer der uebrig gebliebenden Farben
         img2 = Bildgenerator.rotate_img(img2)
-        
+
         self.set_image2(form, color)
         if randint(0,1):
             img1 = np.concatenate((img1, img2), axis=1)
@@ -83,7 +85,6 @@ class Bildgenerator:
             img1 = np.concatenate((img2, img1), axis=1)
         cv.imwrite("Bilder/tmp/target.jpg", img1)
 
-    
     def set_target(self, rule, picture):
         '''Selects randomly which method is used to set the target, with lower level the pictures will more often be exactly like
         one picture(instead of missmatching one picture)'''
@@ -94,11 +95,11 @@ class Bildgenerator:
         elif rule==2:
             self.set_target2()
             return 2
-     
+
     def set_target2(self):
         '''Generates one target picture with two pictures(only one picture is completly dissmatching)'''
         pool = [0, 1, 2, 3]
-        pool.remove(self.position)  
+        pool.remove(self.position)
         form1 = choice(pool)        #Zufaelliges Auswaehlen zweier Formen,
         pool.remove(form1)          #welche nicht zu der Antwort passen
         form2 = choice(pool)        #und entfernen aus dem pool,
@@ -123,7 +124,7 @@ class Bildgenerator:
             self.swap_images()
             target1 = np.concatenate((target2, target1), axis=1)
         cv.imwrite("Bilder/tmp/target.jpg", target1)
-        
+
     def set_target1(self):
         '''Generates one target picture with two pictures(only one picture is completly matching)'''
         color_pool = [0, 1, 2, 3]
@@ -141,7 +142,7 @@ class Bildgenerator:
         '''Colorize the image to the given color code'''
         #Invertiert alle Bilder und setzt dann den entsprechenden Farbkanal auf null und invertiert das Bild dann wieder
         img = ((255,255,255)-img)
-        img[:,:,:] /= 128                       #Setzt alle pixel die invertiert ueber 128 liegen auf 1 alle anderen auf 0, somit werden alle Werte die im Bild dunkel waren 1 alle hellen 0
+        img[:,:,:] = img//128                       #Setzt alle pixel die invertiert ueber 128 liegen auf 1 alle anderen auf 0, somit werden alle Werte die im Bild dunkel waren 1 alle hellen 0
         if color_code == self.color_decode[0]:                      #Blau
             img[:,:,0] *= (255-207)              #(255-RGB-Werte, da diese am ende noch einmal invertiert werden
             img[:,:,1] *= (255-82)
@@ -170,7 +171,7 @@ class Bildgenerator:
         img = cv.resize(img, (285,285))                     #sqrt(2)*200(groesst moegliche laenge bei 200 pixel grossen bildern)
         img = ((255,255,255)-img)
         return img
-        
+
     @staticmethod
     def reduce_img_size(img):
         '''Returns a random reduced image of the given picture'''
@@ -178,7 +179,5 @@ class Bildgenerator:
         dim = ((200-reduction*2), (200-reduction*2))
         img = img.astype(np.float32)
         img = cv.resize(img, dim, interpolation = cv.INTER_AREA)    #Reduziert das auf die gegebene Dimension
-        img = cv.copyMakeBorder(img, reduction, reduction, reduction, reduction, cv.BORDER_CONSTANT, value=(255,255,255)) #Und fügt dann einen Rand hinzu
+        img = cv.copyMakeBorder(img, reduction, reduction, reduction, reduction, cv.BORDER_CONSTANT, value=(255,255,255)) #Und fuegt dann einen Rand hinzu
         return img
-        
-        
