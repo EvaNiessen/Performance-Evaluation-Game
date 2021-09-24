@@ -1,6 +1,6 @@
-# Performance-Evaluation-Game
+# Speeded-Inference-Game
 
-Code to run the Performance Evaluation Game (short PEG). 
+Code to run the Speeded Inference Game (short SIG), here presented as Evaluation Edition.
 
 Setting file should be updated before running. 
 
